@@ -17,53 +17,25 @@ class Weather {
     private val PATTERN = Pattern.compile("^(?:[a-zA-Z]+\\s*)+,\\s*(?:[a-zA-Z]+\\s*)+\$")
     private lateinit var matcher : Matcher
     private var exceptionFlag : Boolean = false
+    private var dailyInfo : WeatherInformation = WeatherInformation()
+    private var weeklyInfo : Array<WeatherInformation> = Array(5) { WeatherInformation() }
 
-    private var longitude : Double = 0.0
-    private var latitude : Double = 0.0
-    private lateinit var mainWeather : String
-    private lateinit var description : String
-    private var temperatureKelvin : Double = 0.0
-    private var feelsLikeKelvin : Double = 0.0
-    private var tempMinKelvin : Double = 0.0
-    private var tempMaxKelvin : Double = 0.0
-    private var pressure : Double = 0.0
-    private var humidity : Double = 0.0
-    private var visibility : Double = 0.0
-    private var windSpeed : Double = 0.0
-    private var windDegree : Double = 0.0
-    private var timezone : Double = 0.0
-    private var sunriseTimestamp : Int = 0
-    private var sunsetTimestamp : Int = 0
-    private lateinit var country : String
-    private lateinit var name : String
-
-    fun isValidLocation(s : String) : Boolean
+    fun isValidLocation(s : String, isWeekly : Boolean) : Boolean
     {
         /*
             Ensure the location is actually valid.
             An example of an invalid call is:
             {"cod":"404","message":"city not found"}
-
-            An example of a valid call is:
-            {"coord":{"lon":-77.1528,"lat":39.084},
-            "weather":[{"id":804,"main":"Clouds","description":"overcast clouds","icon":"04d"}],
-            "base":"stations",
-            "main":{"temp":284.14,"feels_like":282.86,"temp_min":282.6,"temp_max":285.58,"pressure":1001,"humidity":60},
-            "visibility":10000,
-            "wind":{"speed":5.14,"deg":290,"gust":7.2},
-            "clouds":{"all":100},
-            "dt":1683146393,
-            "sys":{"type":2,"id":2021196,"country":"US","sunrise":1683108496,"sunset":1683158557},
-            "timezone":-14400,
-            "id":4367175,
-            "name":"Rockville",
-            "cod":200}
         */
         Log.w("Weather", s)
         matcher = PATTERN.matcher(s)
         if(matcher.matches())
         {
-            var tempString: String = MainActivity.URL.replace("[TARGET]", s)
+            var tempString : String = String()
+            tempString = if(!isWeekly)
+                MainActivity.URL.replace("[TARGET]", s)
+            else
+                MainActivity.URL_FORCAST.replace("[TARGET]", s)
             /*
             Replace the [TARGET] text tag with our actual target city and country.
             MUST be in the format:
@@ -78,31 +50,6 @@ class Weather {
                 false
             } else {
                 Log.w("Weather", "Successful call! $jsonString")
-                // Initialize this class's variables!
-                var headJsonObject : JSONObject = JSONObject(jsonString)
-                var tempJsonObject : JSONObject = headJsonObject.getJSONObject("coord")
-                longitude = tempJsonObject.getDouble("lon")
-                latitude = tempJsonObject.getDouble("lat")
-                tempJsonObject = headJsonObject.getJSONArray("weather").getJSONObject(0)
-                mainWeather = tempJsonObject.getString("main")
-                description = tempJsonObject.getString("description")
-                tempJsonObject = headJsonObject.getJSONObject("main")
-                temperatureKelvin = tempJsonObject.getDouble("temp")
-                feelsLikeKelvin = tempJsonObject.getDouble("feels_like")
-                tempMinKelvin = tempJsonObject.getDouble("temp_min")
-                tempMaxKelvin = tempJsonObject.getDouble("temp_max")
-                pressure = tempJsonObject.getDouble("pressure")
-                humidity = tempJsonObject.getDouble("humidity")
-                visibility = headJsonObject.getDouble("visibility")
-                tempJsonObject = headJsonObject.getJSONObject("wind")
-                windSpeed = tempJsonObject.getDouble("speed")
-                windDegree = tempJsonObject.getDouble("deg")
-                timezone = headJsonObject.getDouble("timezone")
-                tempJsonObject = headJsonObject.getJSONObject("sys")
-                country = tempJsonObject.getString("country")
-                sunriseTimestamp = tempJsonObject.getInt("sunrise")
-                sunsetTimestamp = tempJsonObject.getInt("sunset")
-                name = headJsonObject.getString("name")
                 true
             }
         }
@@ -111,6 +58,108 @@ class Weather {
             Log.w("Weather", "Invalid string: $s")
             return false
         }
+    }
+
+    fun initCurrentWeather(s : String)
+    {
+        if(isValidLocation(s, false))
+        {
+            var headJsonObject : JSONObject = JSONObject(jsonString)
+            var tempJsonObject : JSONObject = headJsonObject.getJSONObject("coord")
+            dailyInfo.longitude = tempJsonObject.getDouble("lon")
+            dailyInfo.latitude = tempJsonObject.getDouble("lat")
+            tempJsonObject = headJsonObject.getJSONArray("weather").getJSONObject(0)
+            dailyInfo.mainWeather = tempJsonObject.getString("main")
+            dailyInfo.description = tempJsonObject.getString("description")
+            tempJsonObject = headJsonObject.getJSONObject("main")
+            dailyInfo.temperatureKelvin = tempJsonObject.getDouble("temp")
+            dailyInfo.feelsLikeKelvin = tempJsonObject.getDouble("feels_like")
+            dailyInfo.tempMinKelvin = tempJsonObject.getDouble("temp_min")
+            dailyInfo.tempMaxKelvin = tempJsonObject.getDouble("temp_max")
+            dailyInfo.pressure = tempJsonObject.getDouble("pressure")
+            dailyInfo.humidity = tempJsonObject.getDouble("humidity")
+            dailyInfo.visibility = headJsonObject.getDouble("visibility")
+            tempJsonObject = headJsonObject.getJSONObject("wind")
+            dailyInfo.windSpeed = tempJsonObject.getDouble("speed")
+            dailyInfo.windDegree = tempJsonObject.getDouble("deg")
+            dailyInfo.timezone = headJsonObject.getDouble("timezone")
+            tempJsonObject = headJsonObject.getJSONObject("sys")
+            dailyInfo.country = tempJsonObject.getString("country")
+            dailyInfo.sunriseTimestamp = tempJsonObject.getInt("sunrise")
+            dailyInfo.sunsetTimestamp = tempJsonObject.getInt("sunset")
+            dailyInfo.name = headJsonObject.getString("name")
+        }
+    }
+
+    fun initWeeklyWeather(s : String)
+    {
+        if(isValidLocation(s, true))
+        {
+            for (i in weeklyInfo.indices)
+            {
+                var masterJsonObject: JSONObject = JSONObject(jsonString)
+                var tempJsonArray : JSONArray = masterJsonObject.getJSONArray("list")
+                var headJsonObject : JSONObject = tempJsonArray.getJSONObject(i shl 3)
+                var tempJsonObject = headJsonObject.getJSONArray("weather").getJSONObject(0)
+                weeklyInfo[i].mainWeather = tempJsonObject.getString("main")
+                weeklyInfo[i].description = tempJsonObject.getString("description")
+                tempJsonObject = headJsonObject.getJSONObject("main")
+                weeklyInfo[i].temperatureKelvin = tempJsonObject.getDouble("temp")
+                weeklyInfo[i].feelsLikeKelvin = tempJsonObject.getDouble("feels_like")
+                weeklyInfo[i].tempMinKelvin = tempJsonObject.getDouble("temp_min")
+                weeklyInfo[i].tempMaxKelvin = tempJsonObject.getDouble("temp_max")
+                weeklyInfo[i].pressure = tempJsonObject.getDouble("pressure")
+                weeklyInfo[i].humidity = tempJsonObject.getDouble("humidity")
+                weeklyInfo[i].visibility = headJsonObject.getDouble("visibility")
+                tempJsonObject = headJsonObject.getJSONObject("wind")
+                weeklyInfo[i].windSpeed = tempJsonObject.getDouble("speed")
+                weeklyInfo[i].windDegree = tempJsonObject.getDouble("deg")
+                tempJsonObject = masterJsonObject.getJSONObject("city")
+                weeklyInfo[i].timezone = tempJsonObject.getDouble("timezone")
+                weeklyInfo[i].country = tempJsonObject.getString("country")
+                weeklyInfo[i].sunriseTimestamp = tempJsonObject.getInt("sunrise")
+                weeklyInfo[i].sunsetTimestamp = tempJsonObject.getInt("sunset")
+                weeklyInfo[i].name = tempJsonObject.getString("name")
+                tempJsonObject = tempJsonObject.getJSONObject("coord")
+                weeklyInfo[i].longitude = tempJsonObject.getDouble("lon")
+                weeklyInfo[i].latitude = tempJsonObject.getDouble("lat")
+            }
+        }
+    }
+
+    fun getDailyInfo() : WeatherInformation
+    {
+        return dailyInfo
+    }
+
+    fun getWeeklyInfo(i : Int) : WeatherInformation?
+    {
+        return if(i > 5)
+            null
+        else
+            weeklyInfo[i]
+    }
+
+    inner class WeatherInformation
+    {
+        var longitude : Double = 0.0
+        var latitude : Double = 0.0
+        lateinit var mainWeather : String
+        lateinit var description : String
+        var temperatureKelvin : Double = 0.0
+        var feelsLikeKelvin : Double = 0.0
+        var tempMinKelvin : Double = 0.0
+        var tempMaxKelvin : Double = 0.0
+        var pressure : Double = 0.0
+        var humidity : Double = 0.0
+        var visibility : Double = 0.0
+        var windSpeed : Double = 0.0
+        var windDegree : Double = 0.0
+        var timezone : Double = 0.0
+        var sunriseTimestamp : Int = 0
+        var sunsetTimestamp : Int = 0
+        lateinit var country : String
+        lateinit var name : String
     }
 
     inner class WeatherThread : Thread

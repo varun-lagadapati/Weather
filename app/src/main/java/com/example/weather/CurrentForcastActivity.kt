@@ -11,8 +11,9 @@ class CurrentForcastActivity : AppCompatActivity() {
     private lateinit var currWeatherTV : TextView
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_current_forecast)
         currWeatherIV = findViewById(R.id.curr_weather_image)
-        currWeatherIV = findViewById(R.id.curr_weather)
+        currWeatherTV = findViewById(R.id.curr_weather)
     }
 
     fun goBack(v: View) {
