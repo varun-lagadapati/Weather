@@ -33,9 +33,6 @@ class WeeklyForecastActivity : AppCompatActivity() {
         day3IV = findViewById(R.id.image_day3)
         day4IV = findViewById(R.id.image_day4)
         day5IV = findViewById(R.id.image_day5)
-
-
-
     }
 
     fun goBack(v: View) {
