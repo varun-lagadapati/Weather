@@ -26,7 +26,6 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import java.util.*
 
-
 class MainActivity : AppCompatActivity() {
     private lateinit var button_1 : Button
     private lateinit var button_2 : Button
@@ -47,10 +46,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         // Loading the ad
-        adView = findViewById(R.id.adView)
-        adBuilder = AdRequest.Builder()
-        adRequest = adBuilder.build()
-        adView.loadAd(adRequest)
+     //   adView = findViewById(R.id.adView)
+  //      adBuilder = AdRequest.Builder()
+     //   adRequest = adBuilder.build()
+   //     adView.loadAd(adRequest)
         button_1 = findViewById(R.id.button_1)
         button_2 = findViewById(R.id.button_2)
         button_3 = findViewById(R.id.button_3)
