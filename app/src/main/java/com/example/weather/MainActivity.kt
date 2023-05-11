@@ -66,12 +66,14 @@ class MainActivity : AppCompatActivity() {
                     var myIntent : Intent = Intent(this, CurrentForcastActivity::class.java)
                     weather.initCurrentWeather(button.text.toString())
                     startActivity(myIntent)
+                    overridePendingTransition(R.anim.fade_in_and_scale, 0)
                 }
                 else if(choice == 1)
                 {
                     var myIntent : Intent = Intent(this, WeeklyForecastActivity::class.java)
                     weather.initWeeklyWeather(button.text.toString())
                     startActivity(myIntent)
+                    overridePendingTransition(R.anim.slide_from_left, 0)
                 }
             })
             builder.show()
