@@ -3,7 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/black">
+    android:background="@color/black"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,7 +23,7 @@
             android:gravity="center"
             />
     </LinearLayout>
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="5"
@@ -32,7 +34,10 @@
             android:layout_width="match_parent"
             android:layout_height= "0dp"
             android:layout_weight="1"
-            android:gravity="center"/>
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
         <!--Current Weather forecast -->
         <TextView
             android:id="@+id/curr_weather"
@@ -42,14 +47,21 @@
             android:fontFamily="casual"
             android:textColor="@color/white"
             android:textSize="27dp"
-            android:gravity="center"/>
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@+id/curr_weather_image"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <Button
             android:id = "@+id/curr_weather_button"
             style="@style/GoBackButtonStyle"
             android:layout_weight="1"
-            android:onClick="goBack"/>
-    </LinearLayout>
+            android:onClick="goBack"
+            app:layout_constraintTop_toBottomOf="@+id/curr_weather"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <!-- Ad -->
     <LinearLayout
         android:id="@+id/ad_view_current"
